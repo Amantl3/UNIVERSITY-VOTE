@@ -1,8 +1,9 @@
 {
   "name": "new-folder-(4)",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,7 +12,8 @@
   "description": "",
   "dependencies": {
     "body-parser": "^2.2.0",
-   "express-session": "^1.18.1",
+    "express": "^4.18.2",
+    "express-session": "^1.18.1",
     "sqlite3": "^5.1.7"
   }
 }
