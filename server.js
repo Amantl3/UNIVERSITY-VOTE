@@ -14,6 +14,11 @@ app.use(session({
   saveUninitialized: true
 }));
 
+// Health check route to test if server is alive
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
+
 // Serve static files from the public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -99,3 +104,4 @@ app.post('/api/vote', (req, res) => {
 app.listen(port, () => {
   console.log(`✅ Server running at http://localhost:${port}`);
 });
+
