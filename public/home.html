@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniVote Home</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <style>
+    body {
+      background-color: #f4f8fb;
+      padding-top: 100px;
+    }
+    .navbar {
+      background-color: #1877f2;
+    }
+    .navbar .nav-link, .navbar .navbar-brand {
+      color: white !important;
+    }
+    .candidate-card {
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      background: white;
+      margin-bottom: 20px;
+    }
+    .candidate-card img {
+      width: 100%;
+      border-radius: 10px;
+      height: 250px;
+      object-fit: cover;
+    }
+    .candidate-name {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    .candidate-party {
+      font-size: 0.95rem;
+      color: gray;
+    }
+    .footer {
+      background-color: #1877f2;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+    }
+    .footer a {
+      color: white;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    #countdownBar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1050;
+      font-size: 1rem;
+      font-weight: bold;
+      background-color: #add8e6; /* Light blue */
+    }
+  </style>
+</head>
+<body>
+
+<!-- Countdown Banner -->
+<div class="container-fluid p-2 text-dark text-center" id="countdownBar">
+  <span id="countdownMessage">⏳ Countdown Loading...</span>
+  <span id="countdownTimer" class="ml-2"></span>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg fixed-top mt-5">
+  <a class="navbar-brand" href="#">UniVote</a>
+  <ul class="navbar-nav ml-auto">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+        <i class="fas fa-bell"></i>
+      </a>
+      <div class="dropdown-menu dropdown-menu-right">
+        <span class="dropdown-item">📢 Voting opens May 25!</span>
+        <span class="dropdown-item">🔐 Vote only once.</span>
+        <span class="dropdown-item">📬 Check your email for login details.</span>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" data-toggle="modal" data-target="#helpModal">Help</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" data-toggle="modal" data-target="#profileModal">
+        <i class="fas fa-user-circle"></i> Profile
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="vote.html">Vote Now</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="index.html">Sign Out</a>
+    </li>
+  </ul>
+</nav>
+
+<!-- Page Content -->
+<div class="container mt-4">
+  <h3 class="text-center mb-4">Meet the Candidates</h3>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="candidate-card">
+        <img src="images/rsl.jpg" alt="RSL">
+        <div class="candidate-name">RSL</div>
+        <div class="candidate-party">Independent Party</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="candidate-card">
+        <img src="images/Moono-wa-baithuti.jpg" alt="Moono wa Baithuti">
+        <div class="candidate-name">Moono wa Baithuti</div>
+        <div class="candidate-party">Student Alliance</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Help - UniVote FAQ</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <ul>
+          <li><strong>Q:</strong> How do I vote?<br><strong>A:</strong> Click "Vote Now".</li>
+          <li><strong>Q:</strong> Can I vote more than once?<br><strong>A:</strong> No, only once.</li>
+          <li><strong>Q:</strong> Forgot password?<br><strong>A:</strong> Contact admin.</li>
+          <li><strong>Q:</strong> Results?<br><strong>A:</strong> After voting ends on July 1st.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal fade" id="profileModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <form id="profileForm">
+        <div class="modal-header">
+          <h5 class="modal-title">My Profile</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="profileName">Full Name</label>
+            <input type="text" class="form-control" id="profileName" value="John Doe" required>
+          </div>
+          <div class="form-group">
+            <label for="profileEmail">Email</label>
+            <input type="email" class="form-control" id="profileEmail" value="student@univote.ac.bw" required>
+          </div>
+          <div class="form-group">
+            <label for="profilePassword">Change Password</label>
+            <input type="password" class="form-control" id="profilePassword" placeholder="New password">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <span id="profileSuccessMsg" class="text-success mr-auto" style="display:none;">✔️ Profile updated!</span>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <p>Contact Us: <a href="mailto:ABC232@thuto.bac.ac.bw">ABC232@thuto.bac.ac.bw</a> | Call: 2345 667</p>
+  <p>UniVote © 2025. All rights reserved.</p>
+</footer>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Countdown logic
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const voteStart = new Date("2025-05-25T00:00:00").getTime();
+    const voteEnd = new Date("2025-06-12T23:59:59").getTime();
+    const resultsDay = new Date("2025-07-01T00:00:00").getTime();
+    let target, label;
+
+    if (now < voteStart) {
+      target = voteStart;
+      label = "🗳️ Voting closes in:";
+    } else if (now >= voteStart && now <= voteEnd) {
+      target = voteEnd;
+      label = "✅ Voting ends in:";
+    } else if (now > voteEnd && now < resultsDay) {
+      target = resultsDay;
+      label = "📢 Results announced in:";
+    } else {
+      document.getElementById("countdownMessage").innerText = "🎉 Voting Completed! Results are out.";
+      document.getElementById("countdownTimer").innerText = "";
+      return;
+    }
+
+    const distance = target - now;
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const secs = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById("countdownMessage").innerText = label;
+    document.getElementById("countdownTimer").innerText = 
+      `${days}d ${hours}h ${mins}m ${secs}s`;
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // Profile form
+  document.getElementById("profileForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    document.getElementById("profileSuccessMsg").style.display = "inline";
+    setTimeout(() => {
+      document.getElementById("profileSuccessMsg").style.display = "none";
+      $('#profileModal').modal('hide');
+    }, 2000);
+  });
+</script>
+
+</body>
+</html>
