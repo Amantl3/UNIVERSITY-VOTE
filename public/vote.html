@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vote - UniVote</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f0f2f5;
+      font-family: Arial, sans-serif;
+      padding-top: 50px;
+    }
+    .banner {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #1877f2;
+      margin-bottom: 20px;
+    }
+    .vote-container {
+      background: white;
+      max-width: 500px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .btn-submit {
+      background-color: #28a745;
+      color: white;
+    }
+    .btn-cancel {
+      background-color: #ccc;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">Every Click Counts — Vote Now!</div>
+  <div class="vote-container">
+    <form id="voteForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" class="form-control" id="username" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" id="password" required />
+      </div>
+      <div class="form-group">
+        <label>Select a Party:</label><br />
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="party" value="Moono-wa-baithuti" required />
+          <label class="form-check-label">Moono-wa-baithuti</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="party" value="RSL" required />
+          <label class="form-check-label">RSL</label>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn btn-submit">Submit Vote</button>
+        <button type="button" class="btn btn-cancel" onclick="goBackHome()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Redirect to homepage if the user cancels the vote
+    function goBackHome() {
+      alert("Still deciding? Let's go back to home!");
+      window.location.href = "home.html";
+    }
+
+    // Handle the vote form submission
+    document.getElementById("voteForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const party = document.querySelector('input[name="party"]:checked')?.value;
+
+      if (!username || !password || !party) {
+        alert("Please fill out all fields.");
+        return;
+      }
+
+      try {
+        // Send the vote data to the backend
+        const response = await fetch("/api/vote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, party })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert("✅ Vote submitted successfully!");
+          document.getElementById("voteForm").reset(); // Reset the form
+        } else {
+          alert("❌ " + (result.message || "Vote failed. You may have already voted."));
+        }
+      } catch (error) {
+        alert("Error submitting vote.");
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>

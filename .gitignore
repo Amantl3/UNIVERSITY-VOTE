@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Security (CRITICAL)
+.env
+
+# Blockchain junk
+artifacts/
+cache/
+deployments/
+coverage/
+coverage.json
+
+# Local Databases
+*.db
+*.db-journal
+
+# Logs
+logs
+*.log
+npm-debug.log*
