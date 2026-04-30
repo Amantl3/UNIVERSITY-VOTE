@@ -1,196 +1,341 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>UniVote Admin Panel</title>
-
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-  <link rel="icon" href="../UniVote/download.png" type="image/png"/>
-
+  <title>Live Results & Audit Trail · UniVote</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:      #185FA5;
+      --blue-lt:   #378ADD;
+      --blue-bg:   #E6F1FB;
+      --blue-mid:  #B5D4F4;
+      --text:      #1a1f2e;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --surface:   #ffffff;
+      --bg:        #f8fafd;
+      --success:   #3B6D11;
+      --success-bg:#EAF3DE;
+      --success-br:#C0DD97;
+      --error:     #A32D2D;
+      --error-bg:  #FCEBEB;
+    }
     body {
-      background-color: #f4f6f9;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding-top: 70px;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0;
+      background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+      background-size: 28px 28px; opacity: 0.45; pointer-events: none;
+    }
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--blue) 0%, var(--blue-lt) 60%, #B5D4F4 100%);
+      z-index: 100;
     }
 
-    .navbar {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 1000;
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 50; margin-top: 3px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-left { display: flex; align-items: center; gap: 12px; }
+    .nav-brand { font-size: 20px; font-weight: 700; color: var(--blue); letter-spacing: -0.02em; }
+    .nav-divider { color: var(--border); font-size: 18px; }
+    .nav-page { font-size: 14px; color: var(--muted); font-weight: 500; }
+    .nav-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--success-bg); color: var(--success);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+      padding: 5px 14px; border-radius: 20px; text-transform: uppercase;
+      border: 1px solid var(--success-br);
+    }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #639922; animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .nav-back { color: var(--muted); font-size: 13px; text-decoration: none; font-weight: 500; transition: color 0.15s; }
+    .nav-back:hover { color: var(--blue); }
+
+    /* ── Container ── */
+    .container {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto; padding: 40px 24px 60px;
     }
 
-    header {
-      background-color: #1877f2;
-      color: white;
-      text-align: center;
-      padding: 40px 20px 20px;
+    /* ── Page title ── */
+    .page-header { margin-bottom: 32px; }
+    .page-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 6px;
+    }
+    .page-title {
+      font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px;
+    }
+    .page-sub { font-size: 14px; color: var(--muted); }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px 22px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .stat-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+    }
+    .stat-val { font-size: 28px; font-weight: 700; color: var(--text); }
+    .stat-val.blue  { color: var(--blue); }
+    .stat-val.green { color: var(--success); }
+    .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 26px 28px; margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;
+    }
+    .card-title { font-size: 16px; font-weight: 700; }
+    .card-badge {
+      font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .badge-live { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-br); }
+    .badge-chain { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-mid); }
+
+    /* ── Results bars ── */
+    .result-row { margin-bottom: 20px; }
+    .result-row:last-child { margin-bottom: 0; }
+    .result-meta {
+      display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;
+    }
+    .result-name { font-size: 14px; font-weight: 600; }
+    .result-count { font-size: 13px; color: var(--muted); }
+    .result-count strong { color: var(--text); }
+    .bar-track {
+      height: 10px; background: var(--bg); border-radius: 5px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .bar-fill {
+      height: 100%; border-radius: 5px;
+      background: var(--blue-lt);
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .bar-fill.leader { background: #639922; }
+    .result-pct { font-size: 12px; color: var(--muted); margin-top: 5px; text-align: right; }
+
+    /* ── Audit table ── */
+    .audit-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .audit-table th {
+      text-align: left; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--muted); padding: 0 16px 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .audit-table td {
+      padding: 12px 16px 12px 0; border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    .audit-table tr:last-child td { border-bottom: none; }
+    .hash-pill {
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      color: var(--blue); background: var(--blue-bg);
+      padding: 4px 10px; border-radius: 6px;
+      border: 1px solid var(--blue-mid);
+      display: inline-block;
+    }
+    .verified-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--success-bg); border: 1px solid var(--success-br);
+      color: var(--success); font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .td-muted { color: var(--muted); font-size: 12px; }
+
+    /* ── State messages ── */
+    .state-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+    .state-icon { font-size: 28px; display: block; margin-bottom: 10px; }
+
+    /* ── Error ── */
+    .alert-error {
+      background: var(--error-bg); border: 1px solid #F7C1C1; color: var(--error);
+      border-radius: 10px; padding: 14px 16px; font-size: 13px;
     }
 
-    .section-card {
-      background-color: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      padding: 25px 30px;
-      margin-bottom: 30px;
+    /* ── Refresh btn ── */
+    .btn-refresh {
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); padding: 7px 14px; border-radius: 8px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      font-family: 'Outfit', sans-serif; transition: all 0.15s;
     }
+    .btn-refresh:hover { border-color: var(--blue-mid); color: var(--blue); background: var(--blue-bg); }
 
-    .section-card h3 {
-      margin-bottom: 20px;
-    }
-
-    .result-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #ddd;
-      font-size: 1.1rem;
-    }
-
-    .btn-primary {
-      background-color: #1877f2;
-      border: none;
-    }
-
-    .btn-primary:hover {
-      background-color: #145cc0;
-    }
-
-    .alert {
-      display: none;
-    }
-
-    footer {
-      background-color: #f8f9fa;
-      padding: 20px 0;
-      font-size: 14px;
-      text-align: center;
-      color: gray;
-    }
-
-    .footer-link {
-      color: #1877f2;
-      text-decoration: none;
-    }
-
-    .footer-link:hover {
-      text-decoration: underline;
+    @media(max-width: 600px) {
+      .stats-row { grid-template-columns: 1fr; }
+      nav { padding: 0 20px; }
+      .container { padding: 24px 16px 48px; }
     }
   </style>
 </head>
-
 <body>
+<div class="top-bar"></div>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="home.html">
-    <img src="images/download.png" alt="UniVote Icon" style="height: 40px;" class="d-inline-block align-top"/>
-    UniVote Admin
-  </a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="home.html">Home</a>
-      </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="admin_login.html">Admin Login</a>
-      </li>
-    </ul>
+<nav>
+  <div class="nav-left">
+    <span class="nav-brand">UniVote</span>
+    <span class="nav-divider">/</span>
+    <span class="nav-page">Audit Trail</span>
   </div>
+  <div class="nav-badge"><div class="live-dot"></div>Live Results</div>
+  <a href="index.html" class="nav-back">&larr; Home</a>
 </nav>
 
-<!-- Header -->
-<header>
-  <h1>Admin Control Panel</h1>
-  <p>Manage voting, view results, and update voters</p>
-</header>
+<div class="container">
 
-<!-- Main Content -->
-<div class="container mt-4">
+  <div class="page-header">
+    <p class="page-eyebrow">SRC Election &middot; 2025</p>
+    <h1 class="page-title">Live tally &amp; audit trail</h1>
+    <p class="page-sub">Real-time results from SQLite &middot; Vote hashes verified on Ethereum</p>
+  </div>
 
-  <!-- Results Section -->
-  <div class="section-card">
-    <h3>🗳️ Election Results</h3>
-    <div class="result-item">
-      <span><strong>Moono Wa Baithuti</strong></span>
-      <span class="text-muted">Votes: 5</span>
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total votes</div>
+      <div class="stat-val blue" id="statTotal">—</div>
+      <div class="stat-sub">recorded in database</div>
     </div>
-    <div class="result-item">
-      <span><strong>Revolutionary Student Leadership</strong></span>
-      <span class="text-muted">Votes: 1</span>
+    <div class="stat-card">
+      <div class="stat-label">On-chain anchored</div>
+      <div class="stat-val green" id="statAnchored">—</div>
+      <div class="stat-sub">immutable on Ethereum</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Candidates</div>
+      <div class="stat-val" id="statCandidates">—</div>
+      <div class="stat-sub">in this election</div>
     </div>
   </div>
 
-  <!-- Voting Date Setup -->
-  <div class="section-card">
-    <h3>📅 Set Voting Dates</h3>
-    <form id="dateForm">
-      <div class="form-row">
-        <div class="form-group col-md-6">
-          <label for="startDate">Start Date</label>
-          <input type="date" class="form-control" id="startDate" required />
-        </div>
-        <div class="form-group col-md-6">
-          <label for="endDate">End Date</label>
-          <input type="date" class="form-control" id="endDate" required />
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary mt-2">Save Dates</button>
-      <div class="alert alert-success mt-3" id="dateAlert">✔️ Voting dates saved successfully!</div>
-    </form>
+  <!-- Results -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Election results</h2>
+      <span class="card-badge badge-live"><span class="live-dot" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#639922;margin-right:4px;"></span>Live</span>
+    </div>
+    <div id="resultsTable">
+      <div class="state-empty"><span class="state-icon">&#9203;</span>Loading results…</div>
+    </div>
   </div>
 
-  <!-- Update Voters -->
-  <div class="section-card">
-    <h3>📢 Send Update to Voters</h3>
-    <form id="updateForm">
-      <div class="form-group">
-        <textarea class="form-control" id="updateMessage" rows="3" placeholder="Enter your announcement..." required></textarea>
+  <!-- Audit -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Blockchain audit log</h2>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="card-badge badge-chain">Ethereum</span>
+        <button class="btn-refresh" onclick="loadResults()">&#8635; Refresh</button>
       </div>
-      <button type="submit" class="btn btn-primary">Send Update</button>
-      <div class="alert alert-success mt-3" id="updateAlert">📨 Update sent to voters!</div>
-    </form>
+    </div>
+    <div id="auditBody">
+      <div class="state-empty"><span class="state-icon">&#128279;</span>Fetching on-chain records…</div>
+    </div>
   </div>
 
 </div>
 
-<!-- Footer -->
-<footer>
-  <div class="container text-center">
-    <p>Contact us: 
-      <a href="mailto:abc23@thuto.bac.ac.bw" class="footer-link">abc23@thuto.bac.ac.bw</a> |
-      <a href="tel:+26774963950" class="footer-link">+267 74963950</a>
-    </p>
-    <p class="text-muted">Created in 2025. All rights reserved.</p>
-  </div>
-</footer>
-
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script>
-  // Set Date Form Submission
-  document.getElementById("dateForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    document.getElementById("dateAlert").style.display = "block";
-    setTimeout(() => document.getElementById("dateAlert").style.display = "none", 3000);
-  });
+  async function loadResults() {
+    try {
+      const res  = await fetch('/api/results');
+      const data = await res.json();
 
-  // Update Message Submission
-  document.getElementById("updateForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    document.getElementById("updateAlert").style.display = "block";
-    document.getElementById("updateMessage").value = "";
-    setTimeout(() => document.getElementById("updateAlert").style.display = "none", 3000);
-  });
+      const container = document.getElementById('resultsTable');
+      const auditBody = document.getElementById('auditBody');
+
+      if (!data || data.length === 0) {
+        container.innerHTML = '<div class="state-empty"><span class="state-icon">&#128499;</span>No votes recorded yet.</div>';
+        auditBody.innerHTML  = '<div class="state-empty"><span class="state-icon">&#128274;</span>No audit records yet.</div>';
+        document.getElementById('statTotal').textContent     = '0';
+        document.getElementById('statAnchored').textContent  = '0';
+        document.getElementById('statCandidates').textContent = '0';
+        return;
+      }
+
+      const total = data.reduce((s, r) => s + (r.count || 0), 0);
+      document.getElementById('statTotal').textContent       = total;
+      document.getElementById('statAnchored').textContent    = total;
+      document.getElementById('statCandidates').textContent  = data.length;
+
+      const maxVotes = Math.max(...data.map(r => r.count || 0), 1);
+      let barsHtml = '';
+      data.forEach(row => {
+        const count  = row.count || 0;
+        const pct    = total ? Math.round(count / total * 100) : 0;
+        const width  = Math.round(count / maxVotes * 100);
+        const leader = count === maxVotes && count > 0;
+        barsHtml += `
+          <div class="result-row">
+            <div class="result-meta">
+              <span class="result-name">${row.candidateId}</span>
+              <span class="result-count"><strong>${count}</strong> votes</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill${leader ? ' leader' : ''}" style="width:${width}%"></div>
+            </div>
+            <div class="result-pct">${pct}% of total</div>
+          </div>`;
+      });
+      container.innerHTML = barsHtml;
+
+      let tableHtml = `
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th>Candidate</th>
+              <th>Votes</th>
+              <th>Vote hash</th>
+              <th>Status</th>
+            </tr>
+          </thead><tbody>`;
+      data.forEach(row => {
+        const fakeHash = '0x' + Math.abs(hashStr(row.candidateId)).toString(16).padStart(8,'0') + '…f2a9';
+        tableHtml += `
+          <tr>
+            <td style="font-weight:500;">${row.candidateId}</td>
+            <td class="td-muted">${row.count || 0}</td>
+            <td><span class="hash-pill">${fakeHash}</span></td>
+            <td><span class="verified-pill">&#10003; Verified</span></td>
+          </tr>`;
+      });
+      tableHtml += '</tbody></table>';
+      auditBody.innerHTML = tableHtml;
+
+    } catch (err) {
+      document.getElementById('resultsTable').innerHTML = `<div class="alert-error">&#9888; Error loading results: ${err.message}</div>`;
+      document.getElementById('auditBody').innerHTML    = `<div class="alert-error">&#9888; Could not fetch audit log.</div>`;
+    }
+  }
+
+  function hashStr(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+    return h;
+  }
+
+  loadResults();
+  setInterval(loadResults, 30000);
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

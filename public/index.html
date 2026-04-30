@@ -1,86 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>UniVote Login</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
+  <title>UniVote | Secure Student Elections</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:      #185FA5;
+      --blue-lt:   #378ADD;
+      --blue-bg:   #E6F1FB;
+      --blue-mid:  #B5D4F4;
+      --text:      #1a1f2e;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --surface:   #ffffff;
+      --bg:        #f8fafd;
+      --success:   #3B6D11;
+      --success-bg:#EAF3DE;
+      --error:     #A32D2D;
+      --error-bg:  #FCEBEB;
+    }
     body {
-      background-color: #eef2f7;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      flex-direction: column;
     }
 
-    .login-container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 400px;
+    /* subtle dot grid bg */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.45;
+      pointer-events: none;
     }
 
-    .login-container h2 {
+    /* top accent line */
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--blue) 0%, var(--blue-lt) 60%, #B5D4F4 100%);
+      z-index: 100;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      margin-top: 3px;
+    }
+    .nav-brand {
+      font-size: 20px; font-weight: 700; color: var(--blue); letter-spacing: -0.02em;
+    }
+    .nav-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--blue-bg); color: var(--blue);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+      padding: 5px 14px; border-radius: 20px; text-transform: uppercase;
+      border: 1px solid var(--blue-mid);
+    }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--blue-lt);
+      animation: blink 2s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ── Main layout ── */
+    main {
+      position: relative; z-index: 1;
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 48px 24px;
+    }
+    .layout {
+      display: grid; grid-template-columns: 1fr 400px;
+      gap: 48px; width: 100%; max-width: 920px; align-items: center;
+    }
+
+    /* ── Brand side ── */
+    .brand { }
+    .brand-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--blue);
       margin-bottom: 20px;
     }
+    .brand-eyebrow::before {
+      content: ''; width: 20px; height: 2px; background: var(--blue); border-radius: 1px;
+    }
+    .brand-title {
+      font-size: clamp(36px, 5vw, 54px); font-weight: 700;
+      line-height: 1.08; letter-spacing: -0.03em;
+      color: var(--text); margin-bottom: 18px;
+    }
+    .brand-title span { color: var(--blue); }
+    .brand-desc {
+      font-size: 16px; color: var(--muted); line-height: 1.7;
+      max-width: 380px; margin-bottom: 36px;
+    }
+    .brand-stats {
+      display: flex; gap: 32px;
+      padding-top: 32px; border-top: 1px solid var(--border);
+    }
+    .brand-stat-val {
+      font-size: 22px; font-weight: 700; color: var(--text);
+    }
+    .brand-stat-lbl { font-size: 12px; color: var(--muted); margin-top: 3px; }
 
-    .quote {
-      margin-top: 20px;
-      font-style: italic;
-      font-size: 0.95rem;
-      text-align: center;
-      color: #555;
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 16px 40px rgba(0,0,0,0.04);
     }
 
-    .register-btn {
-      margin-top: 15px;
-      text-align: center;
+    /* Tabs */
+    .tabs {
+      display: flex; border-bottom: 1px solid var(--border); margin-bottom: 28px;
+    }
+    .tab {
+      flex: 1; padding: 10px 0; text-align: center;
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      background: none; border: none; border-bottom: 2px solid transparent;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'Outfit', sans-serif;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+
+    /* Fields */
+    .field { margin-bottom: 18px; }
+    label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--muted); margin-bottom: 7px;
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    input {
+      width: 100%; padding: 11px 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'Outfit', sans-serif; font-size: 14px;
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input::placeholder { color: #c0cad8; }
+    input:focus {
+      border-color: var(--blue-lt);
+      box-shadow: 0 0 0 3px rgba(55,138,221,0.12);
+      background: #fff;
     }
 
-    .register-btn a {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #6c757d;
-      color: white;
-      border-radius: 5px;
-      text-decoration: none;
+    .btn-primary {
+      width: 100%; padding: 12px;
+      background: var(--blue); color: white;
+      border: none; border-radius: 10px;
+      font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; margin-top: 6px;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover { background: #0C447C; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .form-footer {
+      text-align: center; margin-top: 16px;
+      font-size: 13px; color: var(--muted);
+    }
+    .form-footer a { color: var(--blue); text-decoration: none; font-weight: 500; }
+    .form-footer a:hover { text-decoration: underline; }
+
+    /* Alerts */
+    .alert {
+      display: none; align-items: center; gap: 8px;
+      padding: 11px 14px; border-radius: 8px;
+      font-size: 13px; margin-bottom: 16px; font-weight: 500;
+    }
+    .alert.show { display: flex; }
+    .alert-error {
+      background: var(--error-bg); border: 1px solid #F7C1C1; color: var(--error);
+    }
+    .alert-success {
+      background: var(--success-bg); border: 1px solid #C0DD97; color: var(--success);
     }
 
-    .register-btn a:hover {
-      background-color: #5a6268;
+    /* Quick actions */
+    .quick-actions {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;
+    }
+    .quick-action {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; text-decoration: none; color: var(--text);
+      font-size: 13px; font-weight: 500; transition: all 0.15s;
+    }
+    .quick-action:hover { border-color: var(--blue-mid); background: var(--blue-bg); color: var(--blue); }
+    .qa-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: var(--blue-bg); display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+
+    @media(max-width: 720px) {
+      .layout { grid-template-columns: 1fr; gap: 32px; }
+      .brand { text-align: center; }
+      .brand-eyebrow { justify-content: center; }
+      .brand-desc { max-width: 100%; }
+      .brand-stats { justify-content: center; }
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2 class="text-center">UniVote Login</h2>
-    <form id="loginForm">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" class="form-control" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" class="form-control" required />
-      </div>
-      <button type="submit" class="btn btn-primary btn-block mt-4">Login</button>
-    </form>
+<div class="top-bar"></div>
 
-    <div class="quote">Are you new here?</div>
-    <div class="register-btn">
-      <a href="registration.html">Register</a>
+<nav>
+  <span class="nav-brand">UniVote</span>
+  <div class="nav-badge"><div class="live-dot"></div>Blockchain Secured</div>
+</nav>
+
+<main>
+  <div class="layout">
+
+    <!-- Brand -->
+    <div class="brand">
+      <p class="brand-eyebrow">BAC University · 2025</p>
+      <h1 class="brand-title">Student elections<br/><span>you can trust.</span></h1>
+      <p class="brand-desc">Every vote is anchored on the Ethereum blockchain — publicly verifiable, tamper-proof, and permanently recorded.</p>
+      <div class="brand-stats">
+        <div>
+          <div class="brand-stat-val">256-bit</div>
+          <div class="brand-stat-lbl">Encryption</div>
+        </div>
+        <div>
+          <div class="brand-stat-val">100%</div>
+          <div class="brand-stat-lbl">Auditable</div>
+        </div>
+        <div>
+          <div class="brand-stat-val">Ethereum</div>
+          <div class="brand-stat-lbl">Network</div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <script>
-    document.getElementById("loginForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      window.location.href = "admin_results.html";
-    });
-  </script>
+    <!-- Card -->
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('login', this)">Sign in</button>
+        <button class="tab" onclick="switchTab('register', this)">Register</button>
+      </div>
+
+      <!-- Login -->
+      <div class="form-panel active" id="login">
+        <div class="alert alert-error" id="loginErr">
+          <span>&#9888;</span><span id="loginErrMsg">Invalid credentials</span>
+        </div>
+        <div class="field">
+          <label>Student ID</label>
+          <input type="text" id="loginStudentId" placeholder="e.g. 22005678"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Your password"/>
+        </div>
+        <button class="btn-primary" onclick="doLogin()">Sign in &rarr;</button>
+        <p class="form-footer">Forgot password? <a href="#">Contact admin</a></p>
+      </div>
+
+      <!-- Register -->
+      <div class="form-panel" id="register">
+        <div class="alert alert-error" id="regErr">
+          <span>&#9888;</span><span id="regErrMsg">Registration failed</span>
+        </div>
+        <div class="alert alert-success" id="regOk">
+          <span>&#10003;</span> Registered! You can now sign in.
+        </div>
+        <div class="field">
+          <label>Full name</label>
+          <input type="text" id="regName" placeholder="Your full name"/>
+        </div>
+        <div class="field">
+          <label>Student ID</label>
+          <input type="text" id="regStudentId" placeholder="e.g. 22005678"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="regPassword" placeholder="Choose a password"/>
+        </div>
+        <button class="btn-primary" onclick="doRegister()">Create account &rarr;</button>
+      </div>
+
+      <div class="quick-actions">
+        <a href="vote.html" class="quick-action">
+          <div class="qa-icon">&#128499;</div>Vote now
+        </a>
+        <a href="admin_results.html" class="quick-action">
+          <div class="qa-icon">&#128202;</div>Results
+        </a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(name).classList.add('active');
+  }
+  function showErr(id, msg) {
+    const el = document.getElementById(id);
+    el.querySelector('span:last-child').textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 4000);
+  }
+  async function doLogin() {
+    const studentId = document.getElementById('loginStudentId').value.trim();
+    const password  = document.getElementById('loginPassword').value;
+    if (!studentId || !password) return showErr('loginErr', 'Please fill in all fields');
+    try {
+      const res  = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ studentId, password }) });
+      const data = await res.json();
+      if (res.ok) window.location.href = data.user?.role === 'admin' ? 'admin_results.html' : 'home.html';
+      else showErr('loginErr', data.error || 'Invalid credentials');
+    } catch { showErr('loginErr', 'Server connection failed'); }
+  }
+  async function doRegister() {
+    const name = document.getElementById('regName').value.trim();
+    const studentId = document.getElementById('regStudentId').value.trim();
+    const password  = document.getElementById('regPassword').value;
+    if (!name || !studentId || !password) return showErr('regErr', 'Please fill in all fields');
+    try {
+      const res  = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name, studentId, password }) });
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('regOk').classList.add('show');
+        setTimeout(() => { document.getElementById('regOk').classList.remove('show'); switchTab('login', document.querySelector('.tab')); }, 2000);
+      } else showErr('regErr', data.error || 'Registration failed');
+    } catch { showErr('regErr', 'Server connection failed'); }
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    document.getElementById('login').classList.contains('active') ? doLogin() : doRegister();
+  });
+</script>
 </body>
 </html>
-

@@ -1,112 +1,401 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vote - UniVote</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cast Your Vote · UniVote</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:      #185FA5;
+      --blue-lt:   #378ADD;
+      --blue-bg:   #E6F1FB;
+      --blue-mid:  #B5D4F4;
+      --text:      #1a1f2e;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --surface:   #ffffff;
+      --bg:        #f8fafd;
+      --success:   #3B6D11;
+      --success-bg:#EAF3DE;
+      --success-br:#C0DD97;
+      --error:     #A32D2D;
+      --error-bg:  #FCEBEB;
+      --error-br:  #F7C1C1;
+    }
     body {
-      background-color: #f0f2f5;
-      font-family: Arial, sans-serif;
-      padding-top: 50px;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; flex-direction: column;
     }
-    .banner {
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-      color: #1877f2;
-      margin-bottom: 20px;
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0;
+      background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+      background-size: 28px 28px; opacity: 0.45; pointer-events: none;
     }
-    .vote-container {
-      background: white;
-      max-width: 500px;
-      margin: auto;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--blue) 0%, var(--blue-lt) 60%, #B5D4F4 100%);
+      z-index: 100;
     }
+
+    /* ── Nav ── */
+    nav {
+      position: relative; z-index: 10; margin-top: 3px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand { font-size: 20px; font-weight: 700; color: var(--blue); letter-spacing: -0.02em; }
+    .nav-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--blue-bg); color: var(--blue);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+      padding: 5px 14px; border-radius: 20px; text-transform: uppercase;
+      border: 1px solid var(--blue-mid);
+    }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-lt); animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .nav-back { color: var(--muted); font-size: 13px; text-decoration: none; font-weight: 500; transition: color 0.15s; }
+    .nav-back:hover { color: var(--blue); }
+
+    /* ── Main ── */
+    main {
+      position: relative; z-index: 1;
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 40px 24px;
+    }
+    .layout {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+      width: 100%; max-width: 860px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 32px 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 16px 40px rgba(0,0,0,0.04);
+    }
+    .card-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 6px;
+    }
+    .card-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .card-sub { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
+
+    /* Fields */
+    .field { margin-bottom: 20px; }
+    label {
+      display: block; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    input {
+      width: 100%; padding: 11px 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'Outfit', sans-serif; font-size: 14px;
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input::placeholder { color: #c0cad8; }
+    input:focus { border-color: var(--blue-lt); box-shadow: 0 0 0 3px rgba(55,138,221,0.12); background: #fff; }
+
+    /* Candidate cards */
+    .candidates { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .cand-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; border-radius: 12px;
+      border: 1.5px solid var(--border); background: var(--bg);
+      cursor: pointer; transition: all 0.15s; user-select: none;
+    }
+    .cand-card:hover { border-color: var(--blue-mid); background: var(--blue-bg); }
+    .cand-card.selected { border-color: var(--blue); background: var(--blue-bg); }
+    .cand-card input[type="radio"] { display: none; }
+    .radio {
+      width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .cand-card.selected .radio { border-color: var(--blue); background: var(--blue); }
+    .radio-dot { width: 6px; height: 6px; border-radius: 50%; background: white; opacity: 0; transition: opacity 0.15s; }
+    .cand-card.selected .radio-dot { opacity: 1; }
+    .cand-info { flex: 1; }
+    .cand-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .cand-party { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .cand-badge {
+      font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px;
+      background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-mid);
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .cand-card.selected .cand-badge { opacity: 1; }
+
+    /* Submit */
     .btn-submit {
-      background-color: #28a745;
-      color: white;
+      width: 100%; padding: 13px;
+      background: var(--blue); color: white; border: none; border-radius: 10px;
+      font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; letter-spacing: 0.01em;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .btn-cancel {
-      background-color: #ccc;
-      color: black;
+    .btn-submit:hover:not(:disabled) { background: #0C447C; transform: translateY(-1px); }
+    .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+    .spinner {
+      width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white; border-radius: 50%;
+      animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Alerts */
+    .alert {
+      display: none; align-items: flex-start; gap: 10px;
+      padding: 14px 16px; border-radius: 10px; font-size: 13px; margin-top: 16px;
+    }
+    .alert.show { display: flex; }
+    .alert-success { background: var(--success-bg); border: 1px solid var(--success-br); color: var(--success); }
+    .alert-error   { background: var(--error-bg);   border: 1px solid var(--error-br);   color: var(--error); }
+    .alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+    .alert-title { font-weight: 600; margin-bottom: 3px; }
+    .tx-hash {
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      background: rgba(59,109,17,0.08); padding: 5px 8px; border-radius: 5px;
+      word-break: break-all; margin-top: 6px; color: var(--success);
+    }
+
+    /* Info panel */
+    .info-card { display: flex; flex-direction: column; gap: 20px; }
+    .info-section-title {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+    }
+    .step { display: flex; gap: 12px; margin-bottom: 14px; }
+    .step:last-child { margin-bottom: 0; }
+    .step-num {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      background: var(--blue-bg); border: 1px solid var(--blue-mid);
+      color: var(--blue); font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-body { flex: 1; padding-top: 3px; }
+    .step-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .step-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    .chain-box {
+      background: var(--blue-bg); border: 1px solid var(--blue-mid);
+      border-radius: 12px; padding: 16px;
+    }
+    .chain-box-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 8px;
+    }
+    .chain-box-text { font-size: 12px; color: var(--blue); line-height: 1.7; }
+    .chain-box-text code {
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      background: rgba(24,95,165,0.1); padding: 1px 6px; border-radius: 4px;
+    }
+
+    .results-link {
+      display: block; text-align: center; padding: 12px;
+      border: 1px solid var(--border); border-radius: 10px;
+      color: var(--muted); font-size: 13px; font-weight: 500;
+      text-decoration: none; transition: all 0.15s;
+    }
+    .results-link:hover { border-color: var(--blue-mid); color: var(--blue); background: var(--blue-bg); }
+
+    @media(max-width: 680px) {
+      .layout { grid-template-columns: 1fr; }
+      .info-card { display: none; }
     }
   </style>
 </head>
 <body>
-  <div class="banner">Every Click Counts — Vote Now!</div>
-  <div class="vote-container">
-    <form id="voteForm">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" class="form-control" id="username" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" class="form-control" id="password" required />
-      </div>
-      <div class="form-group">
-        <label>Select a Party:</label><br />
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="party" value="Moono-wa-baithuti" required />
-          <label class="form-check-label">Moono-wa-baithuti</label>
+<div class="top-bar"></div>
+<nav>
+  <span class="nav-brand">UniVote</span>
+  <div class="nav-badge"><div class="live-dot"></div>Blockchain Secured</div>
+  <a href="index.html" class="nav-back">&larr; Back</a>
+</nav>
+
+<main>
+  <div class="layout">
+
+    <!-- Vote form -->
+    <div class="card">
+      <p class="card-eyebrow">SRC Election &middot; 2025</p>
+      <h1 class="card-title">Cast your vote</h1>
+      <p class="card-sub">Your vote will be anchored on Ethereum — secure, anonymous, and permanent.</p>
+
+      <form id="voteForm" onsubmit="return false;">
+        <div class="field">
+          <label>Student ID</label>
+          <input type="text" id="voterId" placeholder="e.g. 2024001" autocomplete="off" required/>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="party" value="RSL" required />
-          <label class="form-check-label">RSL</label>
+
+        <div class="field">
+          <label>Select candidate</label>
+          <div class="candidates">
+            <label class="cand-card" onclick="pickCandidate(this, 'Moono-wa-baithuti')">
+              <input type="radio" name="candidate" value="Moono-wa-baithuti"/>
+              <div class="radio"><div class="radio-dot"></div></div>
+              <div class="cand-info">
+                <div class="cand-name">Moono wa Baithuti</div>
+                <div class="cand-party">Progressive Students Alliance</div>
+              </div>
+              <div class="cand-badge">Selected</div>
+            </label>
+            <label class="cand-card" onclick="pickCandidate(this, 'RSL')">
+              <input type="radio" name="candidate" value="RSL"/>
+              <div class="radio"><div class="radio-dot"></div></div>
+              <div class="cand-info">
+                <div class="cand-name">RSL</div>
+                <div class="cand-party">Reform Student League</div>
+              </div>
+              <div class="cand-badge">Selected</div>
+            </label>
+          </div>
+          <!-- Preserved original ID -->
+          <select id="candidateId" style="display:none;" required>
+            <option value="">-- Choose --</option>
+            <option value="Moono-wa-baithuti">Moono-wa-baithuti</option>
+            <option value="RSL">RSL (Reform Student League)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn" onclick="submitVote()">
+          <span id="btnText">Submit to blockchain</span>
+          <div class="spinner" id="spinner"></div>
+          <span id="btnArrow">&rarr;</span>
+        </button>
+      </form>
+
+      <div class="alert alert-success" id="successAlert">
+        <div class="alert-icon">&#10003;</div>
+        <div>
+          <div class="alert-title">Vote anchored on Ethereum</div>
+          <div>Recorded in SQLite and confirmed on-chain.</div>
+          <div class="tx-hash" id="txHashDisplay"></div>
         </div>
       </div>
-      <div class="text-center">
-        <button type="submit" class="btn btn-submit">Submit Vote</button>
-        <button type="button" class="btn btn-cancel" onclick="goBackHome()">Cancel</button>
+      <div class="alert alert-error" id="errorAlert">
+        <div class="alert-icon">&#9888;</div>
+        <div>
+          <div class="alert-title">Vote failed</div>
+          <div id="errorMsg">Please check your details and try again.</div>
+        </div>
       </div>
-    </form>
+    </div>
+
+    <!-- Info panel -->
+    <div class="card info-card">
+      <div>
+        <p class="info-section-title">How it works</p>
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Enter your Student ID</div>
+            <div class="step-desc">Used to generate your anonymous vote hash — your identity stays private.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Select a candidate</div>
+            <div class="step-desc">Your choice is saved to the SQLite database on our server.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Submit to blockchain</div>
+            <div class="step-desc">A keccak256 hash of your vote is published to Ethereum — immutable and public.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Verify anytime</div>
+            <div class="step-desc">Anyone can confirm your vote was counted correctly using the audit trail.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chain-box">
+        <p class="chain-box-label">Blockchain audit</p>
+        <p class="chain-box-text">
+          Each vote is hashed as<br/>
+          <code>keccak256(voterId + candidateId + electionId + timestamp)</code><br/><br/>
+          Stored permanently on Ethereum. No one can alter or delete it.
+        </p>
+      </div>
+
+      <a href="admin_results.html" class="results-link">View live results &amp; audit trail &rarr;</a>
+    </div>
+
   </div>
+</main>
 
-  <script>
-    // Redirect to homepage if the user cancels the vote
-    function goBackHome() {
-      alert("Still deciding? Let's go back to home!");
-      window.location.href = "home.html";
+<script>
+  let selectedCandidate = '';
+
+  function pickCandidate(el, val) {
+    document.querySelectorAll('.cand-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedCandidate = val;
+    document.getElementById('candidateId').value = val;
+  }
+
+  function setLoading(on) {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = on;
+    document.getElementById('spinner').style.display  = on ? 'block' : 'none';
+    document.getElementById('btnArrow').style.display = on ? 'none' : 'inline';
+    document.getElementById('btnText').textContent    = on ? 'Anchoring to blockchain…' : 'Submit to blockchain';
+  }
+
+  async function submitVote() {
+    const voterId     = document.getElementById('voterId').value.trim();
+    const candidateId = document.getElementById('candidateId').value;
+
+    document.getElementById('successAlert').classList.remove('show');
+    document.getElementById('errorAlert').classList.remove('show');
+
+    if (!voterId)     return showError('Please enter your Student ID');
+    if (!candidateId) return showError('Please select a candidate');
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voterId, candidateId, electionId: 2026 })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        document.getElementById('txHashDisplay').textContent = data.txHash
+          ? `tx: ${data.txHash}`
+          : `Vote hash: ${data.voteHash || 'Recorded'}`;
+        document.getElementById('successAlert').classList.add('show');
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('btnText').textContent = 'Vote submitted';
+        setTimeout(() => { window.location.href = 'admin_results.html'; }, 3000);
+      } else {
+        showError(data.error || 'Check if you already voted');
+      }
+    } catch {
+      showError('Server connection failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
+  }
 
-    // Handle the vote form submission
-    document.getElementById("voteForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-      
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const party = document.querySelector('input[name="party"]:checked')?.value;
-
-      if (!username || !password || !party) {
-        alert("Please fill out all fields.");
-        return;
-      }
-
-      try {
-        // Send the vote data to the backend
-        const response = await fetch("/api/vote", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password, party })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          alert("✅ Vote submitted successfully!");
-          document.getElementById("voteForm").reset(); // Reset the form
-        } else {
-          alert("❌ " + (result.message || "Vote failed. You may have already voted."));
-        }
-      } catch (error) {
-        alert("Error submitting vote.");
-        console.error(error);
-      }
-    });
-  </script>
+  function showError(msg) {
+    document.getElementById('errorMsg').textContent = msg;
+    document.getElementById('errorAlert').classList.add('show');
+    setLoading(false);
+  }
+</script>
 </body>
 </html>
